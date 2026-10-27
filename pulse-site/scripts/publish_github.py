@@ -1,11 +1,11 @@
-"""Upload the reviewed website with GitHub CLI, preserving a private repository.
+"""Upload the reviewed website with GitHub CLI, verifying expected visibility.
 
 Uses the Git Data API to retain unrelated files. No credential is read or saved.
 Ref update is fast-forward only; an intervening update fails safely.
 """
 from pathlib import Path
 import argparse,json,subprocess,hashlib
-p=argparse.ArgumentParser();p.add_argument('--repo',default='yitaozhengacademic-eng/pulse-hemoglobin-workbench');p.add_argument('--gh',default='/Users/zyt/.local/bin/gh');p.add_argument('--install-workflow',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--repo',default='yitaozhengacademic-eng/pulse-hemoglobin-workbench');p.add_argument('--gh',default='/Users/zyt/.local/bin/gh');p.add_argument('--install-workflow',action='store_true');p.add_argument('--expected-visibility',choices=['private','public'],default='private');a=p.parse_args()
 root=Path(__file__).resolve().parents[1]
 def api(endpoint,body=None):
     cmd=[a.gh,'api',endpoint]
@@ -14,7 +14,7 @@ def api(endpoint,body=None):
     if r.returncode:raise RuntimeError(r.stderr.strip()+' '+r.stdout[:600])
     return json.loads(r.stdout)
 repo=api(f'repos/{a.repo}')
-assert repo['private'] is True,'Refusing upload to a non-private repository'
+assert repo['visibility']==a.expected_visibility,'Repository visibility differs from the explicitly expected visibility'
 head=api(f'repos/{a.repo}/git/ref/heads/main')['object']['sha']
 base=api(f'repos/{a.repo}/git/commits/{head}')['tree']['sha']
 tree=[];inventory=[]
@@ -34,6 +34,6 @@ result=subprocess.run([a.gh,'api',f'repos/{a.repo}/git/refs/heads/main','--metho
 if result.returncode:raise RuntimeError(result.stderr+' '+result.stdout[:600])
 confirmed=api(f'repos/{a.repo}/git/ref/heads/main')['object']['sha']
 assert confirmed==commit
-receipt=dict(repository=a.repo,private=True,commit=commit,previous_head=head,source_url=f'https://github.com/{a.repo}/tree/main/pulse-site',files=inventory)
+receipt=dict(repository=a.repo,private=repo['private'],commit=commit,previous_head=head,source_url=f'https://github.com/{a.repo}/tree/main/pulse-site',files=inventory)
 out=root/'deployment-private';out.mkdir(exist_ok=True);(out/'github-upload.json').write_text(json.dumps(receipt,indent=2))
 print(json.dumps({k:v for k,v in receipt.items() if k!='files'}));print('Uploaded files:',len(tree))

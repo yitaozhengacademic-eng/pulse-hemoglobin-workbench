@@ -41,9 +41,11 @@ node --test tests/*.test.mjs
 
 ## GitHub 发布
 
-目标仓库必须为 private，目标为新建私密仓库 `yitaozhengacademic-eng/pulse-hemoglobin-workbench`，上传目录为 `pulse-site/`。将 `docs/pulse-pages.yml` 安装到仓库 `.github/workflows/pulse-pages.yml`。Pages 发布源设为 GitHub Actions。只将 `pulse-site/dist` 上传到 Pages；不可把整个备份仓库作为网站根目录。
+用户于 2026-10-27 明确授权将 `yitaozhengacademic-eng/pulse-hemoglobin-workbench` 设为公开。网站地址：https://yitaozhengacademic-eng.github.io/pulse-hemoglobin-workbench/ 。源码位于 `pulse-site/`，仅 `pulse-site/dist` 作为网页发布；原始患者表不在仓库内。
 
-私密源码仓库与网页访问权限是不同设置：普通 Pages 网站通常公开可访问，私密仓库使用 Pages 需要相应付费计划。若 API 返回套餐限制，保留私密仓库，不改为公开，也不声称网站已上线。
+`.github/workflows/pulse-pages.yml` 已安装并启用：推送更新时测试并部署；每天北京时间 06:23 获取最近 40 日的公共城市环境数据，然后部署。定时执行可能延后，上游数据也可能缺失。网页显示实际更新时间与覆盖天数。其他私密仓库的可见性不受影响。
+
+上传脚本默认仍要求私密仓库；更新本仓库时必须明确传入 `--expected-visibility public`。该选项仅核对预期，不会修改仓库可见性。CLI 上传不改变已通过浏览器安装的工作流。
 
 ## 参考产品
 

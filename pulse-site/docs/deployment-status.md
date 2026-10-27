@@ -1,11 +1,13 @@
 # Deployment status — 2026-10-27
 
-The user requested a new private GitHub repository: `yitaozhengacademic-eng/pulse-hemoglobin-workbench`. The website lives under `pulse-site/`. An earlier private copy was uploaded to `idea` before the user requested a new repository.
+The owner explicitly authorized this repository to become public on 2026-10-27. GitHub CLI verified `PUBLIC` for `yitaozhengacademic-eng/pulse-hemoglobin-workbench`.
 
-GitHub Pages API returned HTTP 422: `Your current plan does not support GitHub Pages for this repository.` The repository remains private.
+Live website: https://yitaozhengacademic-eng.github.io/pulse-hemoglobin-workbench/
 
-The CLI OAuth token has `repo`, `gist`, and `read:org` scopes, but not `workflow`. A tree containing `.github/workflows/pulse-pages.yml` was rejected with 404; the same source upload without that workflow succeeded. The workflow is retained as `docs/pulse-pages.yml`, not enabled. No daily refresh is currently scheduled.
+GitHub Pages uses GitHub Actions and enforces HTTPS. The installed `.github/workflows/pulse-pages.yml` is active. Initial test and deployment run `40465288223` completed successfully. Only `pulse-site/dist` is published as the site.
 
-The bundled environmental snapshot was refreshed through 2026-10-26: 40 daily air files and 21 city weather responses, all 61 requests successful. Recent data can still be incomplete due to ERA5 publication delay.
+The workflow tests model parity and environmental rules, refreshes public environmental observations daily at 06:23 China Standard Time, commits the observations, and deploys the site. GitHub may delay scheduled runs. Source publication delays and missing observations remain visible; a successful workflow does not establish complete exposure coverage.
 
-A private Sites preview is being prepared as a separate host. ERA5 retrieval works on demand; city PM2.5 is served from the bundled observations. This preview does not change the source repository visibility.
+The CLI authorization lacks workflow-writing scope, so the workflow was installed through the owner's authorized Chrome session. Routine source updates and status checks use GitHub CLI. No credentials, original patient tables, manuscript document, or individual patient outputs are published. Tests use invented inputs; checkpoint audits contain only aggregate errors.
+
+The earlier private Sites preview remains separate and is not the canonical public site. The private `idea` backup remains unchanged.
