@@ -1,0 +1,57 @@
+name: PULSE website and environmental data
+on:
+  push:
+    branches: [main]
+    paths: ['pulse-site/**', '.github/workflows/pulse-pages.yml']
+  workflow_dispatch:
+    inputs:
+      refresh_environment:
+        description: Refresh the recent 40 days of city environmental observations
+        type: boolean
+        default: false
+  schedule:
+    - cron: '23 22 * * *'
+concurrency:
+  group: pulse-pages
+  cancel-in-progress: false
+permissions: {}
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Verify model and environmental rules
+        working-directory: pulse-site
+        run: node --test tests/*.test.mjs
+      - name: Refresh public environmental observations
+        if: github.event_name == 'schedule' || inputs.refresh_environment == true
+        run: python3 pulse-site/scripts/update_environment.py
+      - name: Preserve updated environmental observations
+        if: github.event_name == 'schedule' || inputs.refresh_environment == true
+        run: |
+          git add pulse-site/dist/data/environment
+          if git diff --cached --quiet; then exit 0; fi
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'Refresh PULSE public environmental observations'
+          git push
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
+        with:
+          path: pulse-site/dist
+  deploy:
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy only the website directory
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e
